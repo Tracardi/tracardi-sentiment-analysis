@@ -78,11 +78,11 @@ def register() -> Plugin:
         ),
         metadata=MetaData(
             name='Sentiment analysis',
-            desc='It connects to the service that infers sentiment from a given sentence',
+            desc='It connects to the service that predicts sentiment from a given sentence.',
             type='flowNode',
             width=200,
             height=100,
-            icon='icon',
+            icon='paragraph',
             group=["Machine learning"]
         )
     )

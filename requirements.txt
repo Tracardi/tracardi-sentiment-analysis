@@ -1,0 +1,6 @@
+pip>=21.2.4
+tracardi-plugin-sdk
+tracardi
+wheel
+twine
+aiohttp

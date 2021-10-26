@@ -4,12 +4,11 @@ from tracardi.domain.event import Event
 from tracardi.domain.profile import Profile
 from tracardi.domain.session import Session
 from tracardi_plugin_sdk.service.plugin_runner import run_plugin
-
 from tracardi_sentiment_analysis.plugin import SentimentAnalysisAction
 
 init = {
     "source": {
-        "id": "75b367da-9adc-46c9-a4b2-99087e10e3ff"
+        "id": "e7a3979e-7f31-452b-a571-8ca613de77fb"
     },
     "language": "en",
     "text": "This seems awesome, but on the second though it is not."

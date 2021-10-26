@@ -6,32 +6,35 @@ from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_sentiment_analysis.model.configuration import Configuration
 from tracardi_sentiment_analysis.model.sa_source_onfiguration import SASourceConfiguration
+from tracardi_dot_notation.dot_template import DotTemplate
+
+
+def validate(config: dict) -> Configuration:
+    return Configuration(**config)
 
 
 class SentimentAnalysisAction(ActionRunner):
 
     @staticmethod
     async def build(**kwargs) -> 'SentimentAnalysisAction':
-        plugin = SentimentAnalysisAction(**kwargs)
-        source = await read_source(plugin.config.source.id)
-        plugin.source = SASourceConfiguration(
-            **source.config
-        )
+        config = validate(kwargs)
+        source = await storage.driver.resource.load(config.source.id)
+        source = SASourceConfiguration(**source.config)
 
-        return plugin
+        return SentimentAnalysisAction(source, config)
 
-    def __init__(self, **kwargs):
-        self.source = None
-        self.config = Configuration(**kwargs)
+    def __init__(self, source: SASourceConfiguration, config: Configuration):
+        self.source = source
+        self.config = config
 
     async def run(self, payload):
-        dot = DotAccessor(self.profile, self.session, payload, self.event, self.flow)
-
+        dot = self._get_dot_accessor(payload)
+        template = DotTemplate()
         async with aiohttp.ClientSession() as session:
             params = {
                 "key": self.source.token,
                 "lang": self.config.language,
-                "txt": dot[self.config.text]
+                "txt": template.render(self.config.text, dot)
             }
             try:
                 async with session.post('https://api.meaningcloud.com/sentiment-2.1', params=params) as response:
@@ -65,7 +68,7 @@ def register() -> Plugin:
             className='SentimentAnalysisAction',
             inputs=["payload"],
             outputs=['payload', 'error'],
-            version='0.1',
+            version='0.6.0',
             license="MIT",
             author="Risto Kowaczewski",
             init={
@@ -74,7 +77,49 @@ def register() -> Plugin:
                 },
                 "language": "en",
                 "text": None
-            }
+            },
+            form=Form(groups=[
+                FormGroup(
+                    name="Text sentiment resource",
+                    fields=[
+                        FormField(
+                            id="source",
+                            name="MeaningCloud resource",
+                            description="Select MeaningCloud resource. Authentication credentials will be used to "
+                                        "connect to MeaningCloud server.",
+                            component=FormComponent(
+                                type="resource",
+                                props={"label": "resource"})
+                        )
+                    ]
+                ),
+                FormGroup(
+                    name="Text sentiment settings",
+                    fields=[
+                        FormField(
+                            id="language",
+                            name="Language",
+                            description="Select language.",
+                            component=FormComponent(type="select", props={
+                                "label": "Language",
+                                "items": {
+                                    "en": "English",
+                                    "sp": "Spanish",
+                                    "fr": "French",
+                                    "it": "Italian",
+                                    "pt": "Portuguese",
+                                    "ct": "Catalan"
+                                }
+                            })
+                        )
+                        FormField(
+                            id="text",
+                            name="Text",
+                            description="Type text to classify.",
+                            component=FormComponent(type="textarea", props={"rows": 8})
+                        )
+                    ])
+            ]),
         ),
         metadata=MetaData(
             name='Sentiment analysis',

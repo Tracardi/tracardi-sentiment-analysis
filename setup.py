@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='tracardi-sentiment-analysis',
-    version='0.6.0',
+    version='0.6.1',
     description='It connects to the service that infers sentiment from a given sentence',
     long_description=long_description,
     long_description_content_type="text/markdown",

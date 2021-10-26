@@ -68,7 +68,7 @@ def register() -> Plugin:
             className='SentimentAnalysisAction',
             inputs=["payload"],
             outputs=['payload', 'error'],
-            version='0.6.0',
+            version='0.6.1',
             license="MIT",
             author="Risto Kowaczewski",
             init={
@@ -111,7 +111,7 @@ def register() -> Plugin:
                                     "ct": "Catalan"
                                 }
                             })
-                        )
+                        ),
                         FormField(
                             id="text",
                             name="Text",

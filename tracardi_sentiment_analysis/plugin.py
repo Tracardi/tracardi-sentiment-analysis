@@ -1,8 +1,7 @@
 import aiohttp
-from tracardi.service.storage.helpers.source_reader import read_source
-from tracardi_dot_notation.dot_accessor import DotAccessor
+from tracardi.service.storage.driver import storage
 from tracardi_plugin_sdk.action_runner import ActionRunner
-from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData
+from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
 from tracardi_plugin_sdk.domain.result import Result
 from tracardi_sentiment_analysis.model.configuration import Configuration
 from tracardi_sentiment_analysis.model.sa_source_onfiguration import SASourceConfiguration
@@ -68,7 +67,7 @@ def register() -> Plugin:
             className='SentimentAnalysisAction',
             inputs=["payload"],
             outputs=['payload', 'error'],
-            version='0.6.1',
+            version='0.6.2',
             license="MIT",
             author="Risto Kowaczewski",
             init={

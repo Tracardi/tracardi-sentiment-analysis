@@ -70,6 +70,7 @@ def register() -> Plugin:
             version='0.6.2',
             license="MIT",
             author="Risto Kowaczewski",
+            manual="sentiment_analysis_action",
             init={
                 "source": {
                     "id": None

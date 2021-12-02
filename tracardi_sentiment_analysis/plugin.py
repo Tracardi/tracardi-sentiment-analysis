@@ -1,4 +1,5 @@
 import aiohttp
+from tracardi.domain.resource import ResourceCredentials
 from tracardi.service.storage.driver import storage
 from tracardi_plugin_sdk.action_runner import ActionRunner
 from tracardi_plugin_sdk.domain.register import Plugin, Spec, MetaData, Form, FormGroup, FormField, FormComponent
@@ -17,13 +18,11 @@ class SentimentAnalysisAction(ActionRunner):
     @staticmethod
     async def build(**kwargs) -> 'SentimentAnalysisAction':
         config = validate(kwargs)
-        source = await storage.driver.resource.load(config.source.id)
-        source = SASourceConfiguration(**source.config)
+        resource = await storage.driver.resource.load(config.source.id)
+        return SentimentAnalysisAction(config, resource.credentials)
 
-        return SentimentAnalysisAction(source, config)
-
-    def __init__(self, source: SASourceConfiguration, config: Configuration):
-        self.source = source
+    def __init__(self, config: Configuration, credentials: ResourceCredentials):
+        self.credentials = credentials.get_credentials(self, output=SASourceConfiguration)
         self.config = config
 
     async def run(self, payload):
@@ -31,7 +30,7 @@ class SentimentAnalysisAction(ActionRunner):
         template = DotTemplate()
         async with aiohttp.ClientSession() as session:
             params = {
-                "key": self.source.token,
+                "key": self.credentials.token,
                 "lang": self.config.language,
                 "txt": template.render(self.config.text, dot)
             }
@@ -67,7 +66,7 @@ def register() -> Plugin:
             className='SentimentAnalysisAction',
             inputs=["payload"],
             outputs=['payload', 'error'],
-            version='0.6.2',
+            version='0.6.0.1',
             license="MIT",
             author="Risto Kowaczewski",
             manual="sentiment_analysis_action",
@@ -89,7 +88,7 @@ def register() -> Plugin:
                                         "connect to MeaningCloud server.",
                             component=FormComponent(
                                 type="resource",
-                                props={"label": "resource"})
+                                props={"label": "resource", "tag": "token"})
                         )
                     ]
                 ),
